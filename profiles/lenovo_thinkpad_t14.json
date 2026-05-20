@@ -1,0 +1,32 @@
+{
+  "_comment": "Expected hardware profile for Lenovo ThinkPad T14 Gen 4 (AMD). Contribute profiles at github.com/specterscan/specterscan",
+  "model": "Lenovo ThinkPad T14 Gen 4 (AMD)",
+  "year": 2023,
+  "cpu": {
+    "expected_models": ["Ryzen 5 PRO 7540U", "Ryzen 7 PRO 7840U"],
+    "min_cores": 6,
+    "min_threads": 12,
+    "min_base_ghz": 3.2,
+    "max_base_ghz": 3.8
+  },
+  "memory": {
+    "standard_configs_gb": [16, 32, 48, 64],
+    "type": "LPDDR5x",
+    "min_speed_mhz": 6400
+  },
+  "storage": {
+    "standard_configs_gb": [256, 512, 1024, 2048],
+    "interface": "NVMe PCIe 4.0"
+  },
+  "gpu": {
+    "options": ["AMD Radeon 780M (integrated)"]
+  },
+  "battery": {
+    "design_capacity_wh": 58.5,
+    "warn_health_pct": 70,
+    "critical_health_pct": 50
+  },
+  "display": {
+    "options": ["1920x1200 IPS 60Hz", "2560x1600 IPS 60Hz"]
+  }
+}

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpecterScan Report — March 3, 2024 at 16:45:00</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f172a;--surface:#1e293b;--surface2:#273549;--border:#334155;
+  --text:#e2e8f0;--muted:#94a3b8;--green:#22c55e;--yellow:#f59e0b;
+  --red:#ef4444;--blue:#60a5fa;--accent:#818cf8;--radius:10px;
+  --font-mono:'Courier New',Courier,monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.container{max-width:960px;margin:0 auto;padding:32px 20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.header{text-align:center;padding:48px 0 40px;border-bottom:1px solid var(--border);margin-bottom:40px}
+.logo{font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.header h1{font-size:2rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}
+.header .subtitle{color:var(--muted);font-size:14px}
+.meta-pills{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+.meta-pill{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:4px 14px;font-size:12px;color:var(--muted)}
+
+/* ── Verdict hero ─────────────────────────────────────────────── */
+.verdict-hero{text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:32px;position:relative;overflow:hidden}
+.verdict-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#ef444418 0%,transparent 70%);pointer-events:none}
+.score-ring-wrap{position:relative;width:180px;height:180px;margin:0 auto 24px}
+#scoreCanvas{display:block}
+.score-number{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-number .num{font-size:3.2rem;font-weight:800;color:#ef4444;line-height:1}
+.score-number .denom{font-size:14px;color:var(--muted)}
+.verdict-label{font-size:1.6rem;font-weight:800;color:#ef4444;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.verdict-sub{color:var(--muted);font-size:14px}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.card-icon{width:32px;height:32px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.card-title{font-size:1rem;font-weight:600}
+
+/* ── Score bars ───────────────────────────────────────────────── */
+.score-bar-row{display:grid;grid-template-columns:180px 1fr 40px;align-items:center;gap:12px;margin-bottom:10px}
+@media(max-width:640px){.score-bar-row{grid-template-columns:1fr;gap:4px}}
+.score-bar-label{font-size:13px;color:var(--muted)}
+.score-bar-outer{background:var(--surface2);border-radius:999px;height:8px;overflow:hidden}
+.score-bar-inner{height:100%;border-radius:999px;transition:width 0.8s ease}
+.score-bar-value{font-size:13px;font-weight:600;text-align:right}
+
+/* ── Tables ───────────────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+tr:last-child td{border-bottom:none}
+.check-ok{color:var(--green)}
+.check-fail{color:var(--red)}
+
+/* ── Gauge canvases ───────────────────────────────────────────── */
+.gauge-wrap{text-align:center}
+.gauge-label{font-size:13px;color:var(--muted);margin-top:6px}
+.gauge-value{font-size:1.2rem;font-weight:700;margin-top:2px}
+
+/* ── Security findings ────────────────────────────────────────── */
+.finding{padding:10px 14px;border-radius:6px;margin-bottom:8px;background:var(--surface2);font-size:13px;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}
+.finding.clean{color:var(--green)}
+.finding-detail{width:100%;font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-mono)}
+.badge{border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── Recommendations ──────────────────────────────────────────── */
+.rec-item{padding:10px 16px;background:var(--surface2);border-radius:6px;margin-bottom:8px;font-size:13px}
+
+/* ── Flags ────────────────────────────────────────────────────── */
+.flags-list{list-style:none;padding:0}
+.flag-item{padding:6px 0;font-size:13px;color:var(--muted);border-bottom:1px solid var(--border)}
+.flag-item::before{content:"⚠ ";color:var(--yellow)}
+.flag-item:last-child{border-bottom:none}
+.flag-ok{color:var(--green);font-size:13px}
+
+/* ── Thermal chart ────────────────────────────────────────────── */
+#thermalCanvas{width:100%;border-radius:6px;background:var(--surface2);display:block}
+
+/* ── Raw data ─────────────────────────────────────────────────── */
+details summary{cursor:pointer;padding:12px;background:var(--surface2);border-radius:6px;font-size:14px;font-weight:600;user-select:none}
+details summary:hover{background:var(--border)}
+details[open] summary{border-radius:6px 6px 0 0}
+pre.raw-json{background:var(--surface2);padding:20px;border-radius:0 0 6px 6px;font-family:var(--font-mono);font-size:12px;overflow-x:auto;max-height:400px;overflow-y:auto;color:var(--muted);white-space:pre-wrap;word-break:break-all}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:40px}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* ── Print ────────────────────────────────────────────────────── */
+@media print{
+  body{background:#fff;color:#000}
+  .card{border:1px solid #ccc;page-break-inside:avoid}
+  .verdict-hero::before{display:none}
+  pre.raw-json{max-height:none}
+  details[open] summary,details summary{display:none}
+  details{display:block}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">⬡ SpecterScan</div>
+    <h1>Hardware Diagnostic Report</h1>
+    <p class="subtitle">Intel Core i7-1165G7 (SUSPECTED FAKE)</p>
+    <div class="meta-pills">
+      <span class="meta-pill">📅 March 3, 2024 at 16:45:00</span>
+      <span class="meta-pill">💻 Windows</span>
+      <span class="meta-pill">🔑 Yes (elevated)</span>
+    </div>
+  </header>
+
+  <!-- Verdict Hero -->
+  <section class="verdict-hero">
+    <div class="score-ring-wrap">
+      <canvas id="scoreCanvas" width="180" height="180"></canvas>
+      <div class="score-number">
+        <span class="num" id="scoreNum">0</span>
+        <span class="denom">/ 100</span>
+      </div>
+    </div>
+    <div class="verdict-label">DO NOT BUY</div>
+    <div class="verdict-sub">Overall Trust Score</div>
+  </section>
+
+  <!-- Score Breakdown -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📊</div><div class="card-title">Score Breakdown</div></div>
+    
+      <div class="score-bar-row">
+        <div class="score-bar-label">Hardware Authenticity</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:5%;background:#ef4444"></div></div>
+        <div class="score-bar-value">5</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Thermal Health</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:20%;background:#ef4444"></div></div>
+        <div class="score-bar-value">20</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Battery Health</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:15%;background:#ef4444"></div></div>
+        <div class="score-bar-value">15</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Storage Health</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:5%;background:#ef4444"></div></div>
+        <div class="score-bar-value">5</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Performance Under Load</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:25%;background:#ef4444"></div></div>
+        <div class="score-bar-value">25</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Security Posture</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:10%;background:#ef4444"></div></div>
+        <div class="score-bar-value">10</div>
+      </div>
+      <div class="score-bar-row">
+        <div class="score-bar-label">Peripheral Status</div>
+        <div class="score-bar-outer"><div class="score-bar-inner" style="width:60%;background:#f59e0b"></div></div>
+        <div class="score-bar-value">60</div>
+      </div>
+  </div>
+
+  <!-- Hardware Identity -->
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🔍</div><div class="card-title">Hardware Identity</div></div>
+      <table>
+        <thead><tr><th>Component</th><th>Status</th></tr></thead>
+        <tbody><tr><td>CPU Model</td><td class="check-fail">✗ Intel Core i7-1165G7 (REBADGE — i3 clock profile)</td></tr><tr><td>CPU Cores / Threads</td><td class="check-fail">✗ 4 cores / 8 threads (i7 should have ≥10)</td></tr><tr><td>CPU Max Clock</td><td class="check-fail">✗ 1.6 GHz (i7 expected ≥2.8 GHz)</td></tr><tr><td>VM Masking</td><td class="check-fail">✗ Hypervisor detected — specs unverifiable</td></tr><tr><td>Total RAM</td><td class="check-fail">✗ 8.0 GB (listed as 16 GB)</td></tr><tr><td>Board Vendor</td><td class="check-fail">✗ Unknown OEM</td></tr><tr><td>Product Serial</td><td class="check-fail">✗ PLACEHOLDER — cleared</td></tr><tr><td>GPU(s)</td><td class="check-fail">✗ Unknown (0 MB VRAM)</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- Storage -->
+    <div class="card">
+      <div class="card-header"><div class="card-icon">💾</div><div class="card-title">Storage Health</div></div>
+      <table>
+        <thead><tr><th>Drive</th><th>Status</th></tr></thead>
+        <tbody><tr><td>Generic NVMe "512GB"</td><td class="check-fail">✗ 61 GB actual — FAKE CAPACITY DETECTED</td></tr></tbody>
+      </table>
+      <div style="margin-top:20px" class="gauge-wrap">
+        <canvas id="storageGauge" width="160" height="100"></canvas>
+        <div class="gauge-label">Storage Score</div>
+        <div class="gauge-value" id="storageScore" style="color:#ef4444">5</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Battery + Thermal -->
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🔋</div><div class="card-title">Battery Health</div></div>
+      <div class="gauge-wrap">
+        <canvas id="batteryGauge" width="200" height="120"></canvas>
+        <div class="gauge-label">Capacity vs Design</div>
+        <div class="gauge-value" id="batteryPct" style="color:var(--green)">22%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-icon">🌡</div><div class="card-title">Thermal Profile</div></div>
+      <canvas id="thermalCanvas" height="120"></canvas>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center">Temperature over stress test duration (°C)</p>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🛡</div><div class="card-title">Security Findings</div></div>
+    <div class="finding"><span class="badge" style="background:#ef4444">CRITICAL</span> Known crypto miner process: /tmp/.x/xmrig --config=/tmp/.x/config.json<div class="finding-detail">CPU usage: 94.2% — mining Monero</div></div><div class="finding"><span class="badge" style="background:#ef4444">CRITICAL</span> Suspicious hosts file: 3 entries redirecting google.com, microsoft.com, paypal.com</div><div class="finding"><span class="badge" style="background:#f59e0b">WARNING</span> Unknown DNS servers: 185.220.101.1 (Tor exit node)</div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📋</div><div class="card-title">Recommendations</div></div>
+    <div class="rec-item" style="border-left:4px solid #ef4444">DO NOT PURCHASE. Multiple critical fraud indicators detected.</div><div class="rec-item" style="border-left:4px solid #ef4444">CPU is not the advertised model — performance is that of a budget Celeron, not an i7.</div><div class="rec-item" style="border-left:4px solid #ef4444">Storage drive reports 512 GB but only 61 GB is real — all data beyond 61 GB is silently lost.</div><div class="rec-item" style="border-left:4px solid #ef4444">Active crypto miner detected. Device has been compromised.</div>
+  </div>
+
+  <!-- All Flags -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon">⚠</div><div class="card-title">All Detected Issues</div></div>
+    <ul class="flags-list"><li class="flag-item">CPU clock speed suspiciously low for i7: 1.6 GHz (expected ≥ 2.4 GHz) — likely rebadged i3</li><li class="flag-item">Fake capacity detected — write-verify failed at 80% of reported SSD size</li><li class="flag-item">VM/hypervisor masking detected — hardware specs may be virtualised</li><li class="flag-item">System serial number is blank — common on stolen/cleared devices</li><li class="flag-item">Active crypto miner process: xmrig at 94% CPU</li><li class="flag-item">DNS hijacking via hosts file redirection</li><li class="flag-item">Battery health critically low: 22% of design capacity</li></ul>
+  </div>
+
+  <!-- Raw Data -->
+  <div class="card">
+    <details>
+      <summary>🗂 Raw Scan Data (JSON)</summary>
+      <pre class="raw-json">{
+  "verdict": "DO NOT BUY",
+  "score": 18,
+  "note": "Example scam laptop — fake CPU, counterfeit SSD, active crypto miner, dead battery"
+}</pre>
+    </details>
+  </div>
+
+  <footer class="footer">
+    Generated by <a href="https://github.com/specterscan/specterscan">SpecterScan</a> — GPL v3
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+// ── Data injected by reporter.py ────────────────────────────────────────
+const FINAL_SCORE      = 18;
+const VERDICT_COLOR    = "#ef4444";
+const BATTERY_HEALTH   = 22;
+const BATTERY_PRESENT  = true;
+const STORAGE_SCORE    = 5;
+const STRESS_TEMPS     = [55,62,71,78,84,89,93,96,97,97,96,95,96,97,97];
+const CATEGORY_SCORES  = {"hardware_authenticity":5,"thermal":20,"battery":15,"storage":5,"stress":25,"security":10,"usb_peripheral":60};
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+function scoreColor(v){
+  if(v>=80) return "#22c55e";
+  if(v>=50) return "#f59e0b";
+  return "#ef4444";
+}
+
+// ── Score ring (full circle progress) ──────────────────────────────────
+(function drawScoreRing(){
+  const canvas = document.getElementById("scoreCanvas");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const cx=90, cy=90, r=76, lw=12;
+  const pct = FINAL_SCORE / 100;
+  const startAngle = -Math.PI/2;
+  const endAngle   = startAngle + 2*Math.PI*pct;
+
+  // Track
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle="#1e293b";
+  ctx.lineWidth=lw+4;
+  ctx.stroke();
+
+  // Value arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.strokeStyle=VERDICT_COLOR;
+  ctx.lineWidth=lw;
+  ctx.lineCap="round";
+  ctx.stroke();
+
+  // Animate score number
+  const numEl = document.getElementById("scoreNum");
+  let cur=0;
+  const step = FINAL_SCORE/60;
+  const timer = setInterval(()=>{
+    cur = Math.min(cur+step, FINAL_SCORE);
+    numEl.textContent = Math.round(cur);
+    if(cur>=FINAL_SCORE) clearInterval(timer);
+  }, 16);
+})();
+
+// ── Semi-circle gauge ───────────────────────────────────────────────────
+function drawSemiGauge(canvasId, value, color){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w=canvas.width, h=canvas.height;
+  const cx=w/2, cy=h-10, r=h-18;
+
+  // Track
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,Math.PI,0);
+  ctx.strokeStyle="#273549";
+  ctx.lineWidth=14;
+  ctx.stroke();
+
+  // Value arc
+  const angle = Math.PI + (Math.PI * Math.min(value,100)/100);
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,Math.PI,angle);
+  ctx.strokeStyle=color;
+  ctx.lineWidth=14;
+  ctx.lineCap="round";
+  ctx.stroke();
+
+  // Tick labels
+  ctx.fillStyle="#64748b";
+  ctx.font="10px sans-serif";
+  ctx.textAlign="center";
+  ctx.fillText("0%",cx-r-2,cy+4);
+  ctx.fillText("100%",cx+r+4,cy+4);
+  ctx.fillText("50%",cx,cy-r-6);
+}
+
+drawSemiGauge("batteryGauge", BATTERY_PRESENT ? BATTERY_HEALTH : 0, scoreColor(BATTERY_HEALTH));
+drawSemiGauge("storageGauge", STORAGE_SCORE, scoreColor(STORAGE_SCORE));
+
+// ── Thermal line chart ───────────────────────────────────────────────────
+(function drawThermal(){
+  const canvas = document.getElementById("thermalCanvas");
+  if(!canvas) return;
+  const temps = STRESS_TEMPS;
+  canvas.width = canvas.offsetWidth || 600;
+  const ctx = canvas.getContext("2d");
+  const w=canvas.width, h=canvas.height;
+  const pad={top:16,right:16,bottom:24,left:36};
+
+  if(!temps || temps.length < 2){
+    ctx.fillStyle="#64748b";
+    ctx.font="13px sans-serif";
+    ctx.textAlign="center";
+    ctx.fillText("No stress test temperature data", w/2, h/2);
+    return;
+  }
+
+  const mn=Math.min(...temps)-5, mx=Math.max(...temps)+5;
+  const gW=w-pad.left-pad.right, gH=h-pad.top-pad.bottom;
+
+  const toX=i=>(pad.left + (i/(temps.length-1))*gW);
+  const toY=v=>(pad.top + (1-(v-mn)/(mx-mn))*gH);
+
+  // Grid lines
+  ctx.strokeStyle="#1e293b";
+  ctx.lineWidth=1;
+  for(let t=Math.ceil(mn/10)*10; t<=mx; t+=10){
+    const y=toY(t);
+    ctx.beginPath();
+    ctx.moveTo(pad.left,y);
+    ctx.lineTo(pad.left+gW,y);
+    ctx.stroke();
+    ctx.fillStyle="#64748b";
+    ctx.font="10px sans-serif";
+    ctx.textAlign="right";
+    ctx.fillText(t+"°",pad.left-4,y+3);
+  }
+
+  // Warning zone (>85°C)
+  if(mx>85){
+    const warnY=toY(85);
+    ctx.fillStyle="rgba(239,68,68,0.08)";
+    ctx.fillRect(pad.left,pad.top,gW,warnY-pad.top);
+  }
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(toX(0),toY(temps[0]));
+  for(let i=1;i<temps.length;i++) ctx.lineTo(toX(i),toY(temps[i]));
+  ctx.lineTo(toX(temps.length-1), pad.top+gH);
+  ctx.lineTo(toX(0), pad.top+gH);
+  ctx.closePath();
+  ctx.fillStyle="rgba(96,165,250,0.12)";
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(toX(0),toY(temps[0]));
+  for(let i=1;i<temps.length;i++) ctx.lineTo(toX(i),toY(temps[i]));
+  ctx.strokeStyle="#60a5fa";
+  ctx.lineWidth=2;
+  ctx.lineJoin="round";
+  ctx.stroke();
+
+  // Dots
+  for(let i=0;i<temps.length;i++){
+    ctx.beginPath();
+    ctx.arc(toX(i),toY(temps[i]),3,0,2*Math.PI);
+    ctx.fillStyle=temps[i]>=90?"#ef4444":temps[i]>=75?"#f59e0b":"#60a5fa";
+    ctx.fill();
+  }
+})();
+
+// ── Score bar entrance animation ─────────────────────────────────────────
+document.querySelectorAll(".score-bar-inner").forEach(el=>{
+  const target=el.style.width;
+  el.style.width="0%";
+  setTimeout(()=>{ el.style.width=target; }, 200);
+});
+</script>
+</body>
+</html>

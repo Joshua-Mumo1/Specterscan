@@ -1,0 +1,34 @@
+{
+  "_comment": "Template for community hardware profiles. Copy this file, rename it to <vendor>_<model>_<year>.json, fill in the fields, and submit a pull request.",
+  "model": "Vendor Model Name Here",
+  "year": 2023,
+  "cpu": {
+    "expected_models": ["CPU Model A", "CPU Model B"],
+    "min_cores": 4,
+    "min_threads": 8,
+    "min_base_ghz": 1.8,
+    "max_base_ghz": 4.0
+  },
+  "memory": {
+    "standard_configs_gb": [8, 16, 32],
+    "type": "DDR4 or DDR5",
+    "min_speed_mhz": 3200
+  },
+  "storage": {
+    "standard_configs_gb": [256, 512, 1024],
+    "interface": "NVMe or SATA"
+  },
+  "gpu": {
+    "options": ["GPU Model A", "GPU Model B (integrated)"]
+  },
+  "battery": {
+    "design_capacity_wh": 0,
+    "warn_health_pct": 70,
+    "critical_health_pct": 50
+  },
+  "display": {
+    "options": ["1920x1080 60Hz IPS"]
+  },
+  "_contributors": ["your-github-username"],
+  "_sources": ["Link to official spec page"]
+}

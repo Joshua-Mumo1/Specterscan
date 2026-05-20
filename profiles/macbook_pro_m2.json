@@ -1,0 +1,34 @@
+{
+  "_comment": "Expected hardware profile for MacBook Pro 14-inch M2 Pro (2023). Contribute profiles at github.com/specterscan/specterscan",
+  "model": "MacBook Pro 14-inch M2 Pro",
+  "year": 2023,
+  "cpu": {
+    "expected_models": ["Apple M2 Pro", "Apple M2 Max"],
+    "m2_pro_perf_cores": 10,
+    "m2_pro_eff_cores": 4,
+    "m2_max_perf_cores": 12,
+    "m2_max_eff_cores": 4,
+    "min_base_ghz": 3.5,
+    "max_base_ghz": 4.05
+  },
+  "memory": {
+    "standard_configs_gb": [16, 32, 96],
+    "type": "LPDDR5 Unified",
+    "note": "Unified memory — shared CPU/GPU pool"
+  },
+  "storage": {
+    "standard_configs_gb": [512, 1024, 2048, 4096, 8192],
+    "interface": "Apple proprietary NVMe"
+  },
+  "gpu": {
+    "options": ["Apple M2 Pro 16-core GPU", "Apple M2 Pro 19-core GPU", "Apple M2 Max 30-core GPU", "Apple M2 Max 38-core GPU"]
+  },
+  "battery": {
+    "design_capacity_wh": 69.6,
+    "warn_health_pct": 75,
+    "critical_health_pct": 60
+  },
+  "display": {
+    "options": ["3024x1964 Liquid Retina XDR 120Hz"]
+  }
+}

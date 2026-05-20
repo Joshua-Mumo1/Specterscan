@@ -1,0 +1,32 @@
+{
+  "_comment": "Expected hardware profile for Dell XPS 15 9530 (2022-2023). Contribute profiles at github.com/specterscan/specterscan",
+  "model": "Dell XPS 15 9530",
+  "year": 2022,
+  "cpu": {
+    "expected_models": ["Core i7-13700H", "Core i9-13900H"],
+    "min_cores": 14,
+    "min_threads": 20,
+    "min_base_ghz": 2.4,
+    "max_base_ghz": 2.6
+  },
+  "memory": {
+    "standard_configs_gb": [16, 32, 64],
+    "type": "LPDDR5",
+    "min_speed_mhz": 4800
+  },
+  "storage": {
+    "standard_configs_gb": [512, 1024, 2048, 4096],
+    "interface": "NVMe PCIe 4.0"
+  },
+  "gpu": {
+    "options": ["Intel Iris Xe", "NVIDIA GeForce RTX 4060", "NVIDIA GeForce RTX 4070"]
+  },
+  "battery": {
+    "design_capacity_wh": 86,
+    "warn_health_pct": 70,
+    "critical_health_pct": 50
+  },
+  "display": {
+    "options": ["1920x1200 60Hz", "3456x2160 60Hz OLED", "3840x2400 60Hz OLED"]
+  }
+}
